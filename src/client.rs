@@ -71,8 +71,8 @@ impl Client {
         publisher: Sender<ClientMessage>,
     ) -> Self {
         let tokens = authenticate.get_tokens().iter().map(|token| token.to_string()).collect();
-        let mut targets = Vec::with_capacity(30);
-        targets.resize_with(30, Default::default);
+        let mut targets = Vec::with_capacity(128);
+        targets.resize_with(128, Default::default);
 
         Self {
             version,
@@ -189,6 +189,8 @@ impl Client {
 
     pub async fn send_server_config(&self) -> Result<(), MumbleError> {
         let mut server_config = ServerConfig::default();
+        server_config.set_max_bandwidth(144000);
+        server_config.set_max_users(2048);
         server_config.set_allow_html(true);
         server_config.set_message_length(512);
         server_config.set_image_message_length(0);
