@@ -71,8 +71,8 @@ impl Client {
         publisher: Sender<ClientMessage>,
     ) -> Self {
         let tokens = authenticate.get_tokens().iter().map(|token| token.to_string()).collect();
-        let mut targets = Vec::with_capacity(128);
-        targets.resize_with(128, Default::default);
+        let mut targets = Vec::with_capacity(256);
+        targets.resize_with(256, Default::default);
 
         Self {
             version,
@@ -127,14 +127,6 @@ impl Client {
 
         self.send(bytes.as_ref()).await?;
 
-        crate::metrics::MESSAGES_TOTAL
-            .with_label_values(&["tcp", "output", kind.to_string().as_str()])
-            .inc();
-
-        crate::metrics::MESSAGES_BYTES
-            .with_label_values(&["tcp", "output", kind.to_string().as_str()])
-            .inc_by(bytes.len() as u64);
-
         Ok(())
     }
 
@@ -182,7 +174,7 @@ impl Client {
         let mut server_sync = ServerSync::default();
         server_sync.set_max_bandwidth(144000);
         server_sync.set_session(self.session_id);
-        server_sync.set_welcome_text("SoZ Mumble Server".to_string());
+        server_sync.set_welcome_text("Mumble Server".to_string());
 
         self.send_message(MessageKind::ServerSync, &server_sync).await
     }
@@ -210,14 +202,6 @@ impl Client {
                 Ok(Err(e)) => Err(MumbleError::Io(e)),
                 Err(_) => Err(MumbleError::Timeout),
             }?;
-
-            crate::metrics::MESSAGES_TOTAL
-                .with_label_values(&["udp", "output", "VoicePacket"])
-                .inc();
-
-            crate::metrics::MESSAGES_BYTES
-                .with_label_values(&["udp", "output", "VoicePacket"])
-                .inc_by(buf.len() as u64);
 
             return Ok(());
         }
