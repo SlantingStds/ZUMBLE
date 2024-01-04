@@ -21,7 +21,7 @@ pub async fn create_udp_server(protocol_version: u32, socket: Arc<UdpSocket>, st
 }
 
 async fn udp_server_run(protocol_version: u32, socket: Arc<UdpSocket>, state: Arc<RwLock<ServerState>>) -> Result<(), anyhow::Error> {
-    let mut buffer = BytesMut::zeroed(1024 * 4);
+    let mut buffer = BytesMut::zeroed(1024);
     let (size, addr) = socket.recv_from(&mut buffer).await?;
     buffer.resize(size, 0);
 
